@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Don't ignore myself anywhere
+!**/.gitignore
+
+# Don't ignore source files anywhere
+!**/*.go
+
+# Don't ignore Markdown files anywhere
+!**/*.md
