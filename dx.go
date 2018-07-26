@@ -17,8 +17,7 @@ func handleCommand(dz *dazeus.DaZeus, ev dazeus.Event) {
 		maybeDice := ev.Params[0]
 		fmt.Printf("maybeDice: %v\n", maybeDice)
 		if num, err := strconv.Atoi(maybeDice); err == nil && num > 0 {
-			r := rand.New(rand.NewSource(time.Now().UnixNano()))
-			random := r.Intn(num + 1)
+			random := rand.Intn(num) + 1
 			ev.Reply(fmt.Sprintf("Throwing a d%d... It is: %d", num, random), true)
 			return
 		}
@@ -37,6 +36,8 @@ func main() {
 			debug.PrintStack()
 		}
 	}()
+
+	rand.Seed(time.Now().UnixNano())
 
 	dz, err := dazeus.ConnectWithLoggingToStdErr(connStr)
 	if err != nil {
