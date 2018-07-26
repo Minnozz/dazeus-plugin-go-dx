@@ -6,28 +6,21 @@ import (
 	"os"
 	"runtime/debug"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/dazeus/dazeus-go"
 )
 
-var myCommand string
-
-func handlePrivmsg(dz *dazeus.DaZeus, ev dazeus.Event) {
+func handleCommand(dz *dazeus.DaZeus, ev dazeus.Event) {
 	if len(ev.Params) > 1 {
-		// The message sits in evt.Params[0]
-		if idx := strings.Index(ev.Params[0], myCommand); idx > -1 {
-			if len(ev.Params[0]) > 2 {
-				maybeDice := ev.Params[0][2:]
-				fmt.Printf("maybeDice: %v\n", maybeDice)
-				if num, err := strconv.Atoi(maybeDice); err == nil && num > 0 {
-					r := rand.New(rand.NewSource(time.Now().UnixNano()))
-					random := r.Intn(num + 1)
-					ev.Reply(fmt.Sprintf("Throwing a d%d... It is: %d", num, random), true)
-					return
-				}
-			}
+		// The full message after the command sits in ev.Params[0]. Each word of ev.Params[0] is put into ev.Params[1..n].
+		maybeDice := ev.Params[0]
+		fmt.Printf("maybeDice: %v\n", maybeDice)
+		if num, err := strconv.Atoi(maybeDice); err == nil && num > 0 {
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
+			random := r.Intn(num + 1)
+			ev.Reply(fmt.Sprintf("Throwing a d%d... It is: %d", num, random), true)
+			return
 		}
 	}
 	ev.Reply("Sorry, cannot interpret this command as a dice roll!", true)
@@ -50,14 +43,12 @@ func main() {
 		panic(err)
 	}
 
-	if hl, hlerr := dz.HighlightCharacter(); hlerr != nil {
+	if _, hlerr := dz.HighlightCharacter(); hlerr != nil {
 		panic(hlerr)
-	} else {
-		myCommand = hl + "d"
 	}
 
-	_, err = dz.Subscribe(dazeus.EventPrivMsg, func(ev dazeus.Event) {
-		handlePrivmsg(dz, ev)
+	_, err = dz.SubscribeCommand("throw", dazeus.NewUniversalScope(), func(ev dazeus.Event) {
+		handleCommand(dz, ev)
 	})
 	if err != nil {
 		panic(err)
