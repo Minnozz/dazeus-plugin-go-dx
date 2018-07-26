@@ -18,7 +18,7 @@ func handleCommand(dz *dazeus.DaZeus, ev dazeus.Event) {
 		fmt.Printf("maybeDice: %v\n", maybeDice)
 		if num, err := strconv.Atoi(maybeDice); err == nil && num > 0 {
 			r := rand.New(rand.NewSource(time.Now().UnixNano()))
-			random := r.Intn(num + 1)
+			random := r.Intn(num) + 1
 			ev.Reply(fmt.Sprintf("Throwing a d%d... It is: %d", num, random), true)
 			return
 		}
